@@ -1,32 +1,45 @@
 ﻿# AGENTE GA4
 
-Projeto independente para alimentar um agente GPT com dados do Google Analytics 4.
+Projeto independente para alimentar o GPT com dados do Google Analytics 4. **Nunca reutilize** o projeto `trae-appsaldos-473218-n7` nem o backend antigo.
 
-## Status atual
-- **Projeto GCP**: `gmail-credentials-474123` (billing ativo).
-- **Cloud Run**: serviço `agente-ga4-api` rodando em `us-central1`.
-- **URL**: https://agente-ga4-api-860407662159.us-central1.run.app
-- **Token interno**: `ga4-internal-token` (enviar no header `x-internal-token`).
+## Projeto Cloud Run
+- Projeto GCP: `gmail-credentials-474123`
+- Serviço: `agente-ga4-api` (`us-central1`)
+- URL: `https://agente-ga4-api-860407662159.us-central1.run.app`
+- Token interno: `ga4-internal-token`
+- Refresh token atual salvo em `GOOGLE_REFRESH_TOKEN` e em `backend/tokens/ga4.json` (não commitar).
 
-## Estrutura
-- `backend/`: API Express que gera automaticamente o refresh token via OAuth Device Flow.
-  - Scripts úteis:
-    - `npm run dev` — ambiente local.
-    - `npm run device-flow` — dispara o Device Flow localmente (usa `GOOGLE_CLIENT_ID/SECRET`).
-- `openapi/ga4.openapi.json`: spec usada pelo GPT.
-- `documentação/`: guias (Deploy, GPT_SETUP, Credenciais).
+## Repositório dedicado
+Execute:
+```bash
+cd "AGENTE GA4"
+# autentique antes: gh auth login
+# então crie/publishe o repositório privado
+# gh repo create gmail-credentials-ga4-agent --private --source=. --remote=origin --push
+```
 
-## Como gerar o refresh token pela primeira vez
-1. Opcionalmente, rode localmente: `cd "AGENTE GA4/backend" && npm run device-flow`.
-2. Siga o link e informe o código exibido no console.
-3. O token é salvo em `backend/tokens/ga4.json`. Adicione o valor em `GOOGLE_REFRESH_TOKEN` se quiser fixá-lo no Cloud Run.
-4. Em produção, basta fazer uma chamada (ex.: `curl -H "x-internal-token: ga4-internal-token" "https://agente-ga4-api-860407662159.us-central1.run.app/ga4/properties?name=teste"`) e copiar link/código do log do Cloud Run.
+## Scripts importantes
+- `backend/deploy-cloud-run.sh` / `backend/deploy-cloud-run.ps1`: verificam se o projeto ativo do gcloud é `gmail-credentials-474123` e executam build + deploy com as variáveis já preenchidas.
+- `backend/scripts/list-account-summaries.mjs`: lista contas/propriedades GA4 disponíveis (usado para descobrir IDs).
+- `backend/scripts/test-run-report.mjs` e `backend/scripts/call-cloud-run.mjs`: testes locais/Cloud Run para garantir que os endpoints estão respondendo.
 
-## Rotas disponíveis
-| Método | Rota | Descrição |
-| ------ | ---- | --------- |
-| GET | `/ga4/properties` | Busca propriedades GA4 pelo `displayName` e/ou `account`. |
-| GET | `/ga4/properties/:propertyId/metadata` | Lista dimensões e métricas disponíveis. |
-| POST | `/ga4/properties/:propertyId/runReport` | Executa relatórios personalizados. |
+## Documentação
+- `documentação/DEPLOY.md`: passo a passo (com OAuth Playground) para atualizar Cloud Run.
+- `documentação/GPT_SETUP.md`: preenchimento completo do GPT Builder usando o endpoint real.
+- `openapi/ga4.openapi.json`: especificação atualizada com a URL pública.
 
-Veja `documentação/GPT_SETUP.md` para configurar o agente GPT com esses endpoints.
+## Comandos úteis
+```bash
+# instalar deps (no novo projeto apenas)
+cd "AGENTE GA4/backend"
+npm install
+
+# testar chamadas locais
+node scripts/list-account-summaries.mjs
+node scripts/test-run-report.mjs
+
+# testar Cloud Run
+node scripts/call-cloud-run.mjs
+```
+
+> Atenção: sempre verifique o projeto ativo (`gcloud config list --format 'value(core.project)'`). Se for diferente de `gmail-credentials-474123`, execute `gcloud config set project gmail-credentials-474123` antes de qualquer deploy.

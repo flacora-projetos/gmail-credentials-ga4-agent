@@ -58,7 +58,13 @@ router.get('/properties/:propertyId/metadata', async (req, res) => {
   try {
     if (!ensureInternalToken(req, res)) return;
     const data = await fetchGa4Metadata(req.params.propertyId, {
-      languageCode: req.query.languageCode
+      languageCode: req.query.languageCode,
+      search: req.query.search,
+      includeDimensions: req.query.includeDimensions,
+      includeMetrics: req.query.includeMetrics,
+      maxItems: req.query.maxItems,
+      maxDimensions: req.query.maxDimensions,
+      maxMetrics: req.query.maxMetrics
     });
     res.json({ ok: true, data });
   } catch (error) {

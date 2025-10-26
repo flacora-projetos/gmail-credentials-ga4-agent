@@ -100,6 +100,42 @@
             "in": "query",
             "schema": { "type": "string" },
             "description": "Idioma opcional (ex.: pt-BR)."
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Filtra dimensões/métricas cujo nome ou descrição contenham o termo (case-insensitive)."
+          },
+          {
+            "name": "includeDimensions",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Lista separada por vírgula dos apiNames de dimensões que devem ser mantidas."
+          },
+          {
+            "name": "includeMetrics",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Lista separada por vírgula dos apiNames de métricas que devem ser mantidas."
+          },
+          {
+            "name": "maxItems",
+            "in": "query",
+            "schema": { "type": "integer" },
+            "description": "Limite geral de itens retornados (aplicado tanto a dimensões quanto a métricas)."
+          },
+          {
+            "name": "maxDimensions",
+            "in": "query",
+            "schema": { "type": "integer" },
+            "description": "Limite máximo de dimensões retornadas."
+          },
+          {
+            "name": "maxMetrics",
+            "in": "query",
+            "schema": { "type": "integer" },
+            "description": "Limite máximo de métricas retornadas."
           }
         ],
         "responses": {
@@ -236,20 +272,10 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/Ga4BatchRunReportsRequest" },
+              "schema": { "$ref": "#/components/schemas/Ga4CompatibilityRequest" },
               "example": {
-                "requests": [
-                  {
-                    "dimensions": [ { "name": "date" } ],
-                    "metrics": [ { "name": "sessions" } ],
-                    "dateRanges": [ { "startDate": "2025-10-01", "endDate": "2025-10-07" } ]
-                  },
-                  {
-                    "dimensions": [ { "name": "city" } ],
-                    "metrics": [ { "name": "totalUsers" } ],
-                    "limit": 5
-                  }
-                ]
+                "dimensions": [ { "name": "date" } ],
+                "metrics": [ { "name": "sessions" }, { "name": "totalUsers" } ]
               }
             }
           }
@@ -373,8 +399,10 @@
             "application/json": {
               "schema": { "$ref": "#/components/schemas/Ga4CompatibilityRequest" },
               "example": {
-                "dimensions": [ { "name": "date" } ],
-                "metrics": [ { "name": "sessions" }, { "name": "totalUsers" } ]
+                "compatibilityRequest": {
+                  "dimensions": [ { "name": "date" } ],
+                  "metrics": [ { "name": "sessions" }, { "name": "totalUsers" } ]
+                }
               }
             }
           }
@@ -505,8 +533,13 @@
           "dimensions": { "type": "array", "items": { "type": "object" } },
           "metrics": { "type": "array", "items": { "type": "object" } },
           "dimensionFilter": { "type": "object" },
-          "metricFilter": { "type": "object" }
+          "metricFilter": { "type": "object" },
+          "compatibilityFilter": {
+            "type": "string",
+            "description": "Opcional: restringe a resposta para a compatibilidade desejada (ex.: COMPATIBLE)."
+          }
         },
+        "required": [ "dimensions", "metrics" ],
         "additionalProperties": true
       },
       "Ga4GenericResponse": {

@@ -1,0 +1,8 @@
+﻿/backend/node_modules/
+/backend/tokens/
+/backend/.env
+/backend/.env.local
+/backend/.env.*
+!/backend/.env.example
+/documentação/CREDENCIAIS*
+*.log

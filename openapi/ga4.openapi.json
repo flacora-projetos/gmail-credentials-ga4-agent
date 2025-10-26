@@ -1,66 +1,48 @@
-{
+﻿{
   "openapi": "3.1.0",
   "info": {
     "title": "GA4 Agent API",
     "version": "1.0.0",
-    "description": "API para listar propriedades GA4 e executar relatorios usando OAuth",
+    "description": "API para listar propriedades GA4 e executar relatórios.",
     "license": {
       "name": "Internal Use Only",
       "identifier": "Proprietary"
     }
   },
   "servers": [
-    {
-      "url": "https://agente-ga4-api-860407662159.us-central1.run.app"
-    }
+    { "url": "https://agente-ga4-api-860407662159.us-central1.run.app" }
   ],
   "paths": {
     "/ga4/properties": {
       "get": {
         "operationId": "findGa4Properties",
         "summary": "Busca propriedades GA4 pelo nome",
-        "security": [
-          {
-            "googleOAuth": [
-              "https://www.googleapis.com/auth/analytics.readonly"
-            ]
-          }
-        ],
+        "security": [ { "internalToken": [] } ],
         "parameters": [
           {
             "name": "name",
             "in": "query",
             "required": true,
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "description": "Trecho do displayName do property."
           },
           {
             "name": "account",
             "in": "query",
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "description": "Opcional: conta completa (accounts/123) ou apenas o ID."
           },
           {
             "name": "pageSize",
             "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 200
-            },
-            "description": "Itens por pagina (default 50)."
+            "schema": { "type": "integer", "minimum": 1, "maximum": 200 },
+            "description": "Itens por página (default 50)."
           },
           {
             "name": "pageToken",
             "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "description": "Token de paginacao retornado pela chamada anterior."
+            "schema": { "type": "string" },
+            "description": "Token de paginação retornado pela chamada anterior."
           }
         ],
         "responses": {
@@ -71,48 +53,23 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean"
-                    },
+                    "ok": { "type": "boolean" },
                     "properties": {
                       "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "name": {
-                            "type": "string"
-                          },
-                          "propertyId": {
-                            "type": "string"
-                          },
-                          "displayName": {
-                            "type": "string"
-                          },
-                          "parent": {
-                            "type": "string"
-                          },
-                          "timeZone": {
-                            "type": "string"
-                          }
-                        },
-                        "additionalProperties": true
-                      }
+                      "items": { "$ref": "#/components/schemas/Ga4Property" }
                     },
-                    "nextPageToken": {
-                      "type": "string"
-                    }
+                    "nextPageToken": { "type": "string" }
                   },
-                  "additionalProperties": true
+                  "additionalProperties": false
                 },
                 "example": {
                   "ok": true,
                   "properties": [
                     {
-                      "name": "properties/123456789",
-                      "propertyId": "123456789",
-                      "displayName": "Minha Loja",
-                      "parent": "accounts/987654321",
-                      "timeZone": "America/Sao_Paulo"
+                      "name": "properties/398907411",
+                      "propertyId": "398907411",
+                      "displayName": "Hannover - GA4",
+                      "parent": "accounts/175492763"
                     }
                   ],
                   "nextPageToken": ""
@@ -120,42 +77,28 @@
               }
             }
           },
-          "400": {
-            "description": "Requisicao invalida para a API GA4"
-          },
-          "401": {
-            "description": "Autenticacao OAuth invalida ou ausente"
-          }
+          "400": { "description": "Requisição inválida para a API GA4" },
+          "401": { "description": "Autenticação inválida ou ausente" }
         }
       }
     },
     "/ga4/properties/{propertyId}/metadata": {
       "get": {
         "operationId": "getGa4Metadata",
-        "summary": "Lista dimensoes e metricas disponiveis",
-        "security": [
-          {
-            "googleOAuth": [
-              "https://www.googleapis.com/auth/analytics.readonly"
-            ]
-          }
-        ],
+        "summary": "Lista dimensões e métricas disponíveis",
+        "security": [ { "internalToken": [] } ],
         "parameters": [
           {
             "name": "propertyId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "description": "ID da propriedade (com ou sem prefixo properties/)."
           },
           {
             "name": "languageCode",
             "in": "query",
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "description": "Idioma opcional (ex.: pt-BR)."
           }
         ],
@@ -167,46 +110,30 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object"
-                    }
+                    "ok": { "type": "boolean" },
+                    "data": { "type": "object" }
                   },
                   "additionalProperties": true
                 }
               }
             }
           },
-          "400": {
-            "description": "Requisicao invalida para a API GA4"
-          },
-          "401": {
-            "description": "Autenticacao OAuth invalida ou ausente"
-          }
+          "400": { "description": "Requisição inválida para a API GA4" },
+          "401": { "description": "Autenticação inválida ou ausente" }
         }
       }
     },
     "/ga4/properties/{propertyId}/runReport": {
       "post": {
         "operationId": "runGa4Report",
-        "summary": "Executa relatorio GA4",
-        "security": [
-          {
-            "googleOAuth": [
-              "https://www.googleapis.com/auth/analytics.readonly"
-            ]
-          }
-        ],
+        "summary": "Executa relatório GA4",
+        "security": [ { "internalToken": [] } ],
         "parameters": [
           {
             "name": "propertyId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "description": "ID da propriedade (com ou sem prefixo properties/)."
           }
         ],
@@ -214,85 +141,11 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "dimensions": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "name": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "name"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "metrics": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "name": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "name"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "dateRanges": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "startDate": {
-                          "type": "string"
-                        },
-                        "endDate": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "startDate",
-                        "endDate"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "limit": {
-                    "type": "integer"
-                  }
-                },
-                "required": [
-                  "metrics",
-                  "dateRanges"
-                ],
-                "additionalProperties": true
-              },
+              "schema": { "$ref": "#/components/schemas/Ga4ReportRequest" },
               "example": {
-                "dimensions": [
-                  {
-                    "name": "date"
-                  }
-                ],
-                "metrics": [
-                  {
-                    "name": "sessions"
-                  }
-                ],
-                "dateRanges": [
-                  {
-                    "startDate": "2025-01-01",
-                    "endDate": "2025-01-07"
-                  }
-                ],
+                "dimensions": [ { "name": "date" } ],
+                "metrics": [ { "name": "sessions" } ],
+                "dateRanges": [ { "startDate": "2025-01-01", "endDate": "2025-01-07" } ],
                 "limit": 100
               }
             }
@@ -306,41 +159,83 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object"
-                    }
+                    "ok": { "type": "boolean" },
+                    "data": { "type": "object" }
                   },
                   "additionalProperties": true
                 }
               }
             }
           },
-          "400": {
-            "description": "Requisicao invalida para a API GA4"
-          },
-          "401": {
-            "description": "Autenticacao OAuth invalida ou ausente"
-          }
+          "400": { "description": "Requisição inválida para a API GA4" },
+          "401": { "description": "Autenticação inválida ou ausente" }
         }
       }
     }
   },
   "components": {
     "securitySchemes": {
-      "googleOAuth": {
-        "type": "oauth2",
-        "flows": {
-          "authorizationCode": {
-            "authorizationUrl": "https://accounts.google.com/o/oauth2/v2/auth",
-            "tokenUrl": "https://oauth2.googleapis.com/token",
-            "scopes": {
-              "https://www.googleapis.com/auth/analytics.readonly": "Permite leitura de dados GA4"
+      "internalToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-internal-token",
+        "description": "Informe o token interno configurado no Cloud Run."
+      }
+    },
+    "schemas": {
+      "Ga4Property": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "propertyId": { "type": "string" },
+          "displayName": { "type": "string" },
+          "parent": { "type": "string" },
+          "timeZone": { "type": "string" },
+          "currencyCode": { "type": "string" }
+        },
+        "additionalProperties": true
+      },
+      "Ga4ReportRequest": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" }
+              },
+              "required": [ "name" ],
+              "additionalProperties": false
             }
-          }
-        }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" }
+              },
+              "required": [ "name" ],
+              "additionalProperties": false
+            }
+          },
+          "dateRanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startDate": { "type": "string" },
+                "endDate": { "type": "string" }
+              },
+              "required": [ "startDate", "endDate" ],
+              "additionalProperties": false
+            }
+          },
+          "limit": { "type": "integer" }
+        },
+        "required": [ "metrics", "dateRanges" ],
+        "additionalProperties": true
       }
     }
   }

@@ -3,8 +3,6 @@ import { getAccessToken } from './googleAuth.js';
 import { buildErrorResponse } from '../utils.js';
 
 const ANALYTICS_ADMIN_BASE = 'https://analyticsadmin.googleapis.com/v1beta';
-const DEFAULT_PAGE_SIZE = 50;
-const MAX_PAGE_SIZE = 200;
 
 function normalizeAccount(accountRaw) {
   if (!accountRaw) return null;
@@ -15,24 +13,6 @@ function normalizeAccount(accountRaw) {
   const err = new Error(`Parametro account invalido: ${accountRaw}`);
   err.status = 400;
   throw err;
-}
-
-function escapeFilterValue(value) {
-  return String(value).replace(/"/g, '\\"');
-}
-
-function buildFilter({ name, account }) {
-  const parts = [];
-  if (account) parts.push(`parent:${account}`);
-  if (name) parts.push(`displayName:"${escapeFilterValue(name)}"`);
-  return parts.join(' ');
-}
-
-function clampPageSize(raw) {
-  if (raw === undefined || raw === null) return DEFAULT_PAGE_SIZE;
-  const parsed = Number.parseInt(raw, 10);
-  if (!Number.isFinite(parsed) || parsed <= 0) return DEFAULT_PAGE_SIZE;
-  return Math.min(Math.max(parsed, 1), MAX_PAGE_SIZE);
 }
 
 function normalizeProperty(property = {}) {
@@ -59,45 +39,9 @@ export async function fetchGa4Properties(options = {}) {
   }
 
   const account = normalizeAccount(options?.account);
-  const pageSize = clampPageSize(options?.pageSize);
-  const pageToken = options?.pageToken ? String(options.pageToken).trim() || null : null;
-
   const { token, scope } = await getAccessToken();
 
   try {
-    if (account) {
-      const filter = `parent:${account}`;
-      const params = new URLSearchParams();
-      params.set('pageSize', String(pageSize));
-      params.set('filter', filter);
-      if (pageToken) params.set('pageToken', pageToken);
-
-      const url = `${ANALYTICS_ADMIN_BASE}/properties?${params.toString()}`;
-      const response = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      const properties = Array.isArray(response.data?.properties)
-        ? response.data.properties
-            .map((property) => normalizeProperty(property))
-            .filter((property) =>
-              property.displayName ? property.displayName.toLowerCase().includes(name.toLowerCase()) : false
-            )
-        : [];
-
-      return {
-        ok: true,
-        properties,
-        nextPageToken: response.data?.nextPageToken ?? null,
-        metadata: {
-          filter,
-          pageSize,
-          pageToken,
-          tokenScopes: scope ?? null
-        }
-      };
-    }
-
     const summariesResponse = await axios.get(`${ANALYTICS_ADMIN_BASE}/accountSummaries`, {
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -109,6 +53,9 @@ export async function fetchGa4Properties(options = {}) {
     const matched = [];
 
     summaries.forEach((summary) => {
+      if (account && summary.account !== account) {
+        return;
+      }
       const properties = summary.propertySummaries ?? [];
       properties.forEach((property) => {
         if (!property.displayName) {
@@ -135,7 +82,8 @@ export async function fetchGa4Properties(options = {}) {
       nextPageToken: null,
       metadata: {
         source: 'accountSummaries',
-        tokenScopes: scope ?? null
+        tokenScopes: scope ?? null,
+        filteredAccount: account ?? null
       }
     };
   } catch (error) {

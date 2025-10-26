@@ -66,10 +66,10 @@
                   "ok": true,
                   "properties": [
                     {
-                      "name": "properties/398907411",
-                      "propertyId": "398907411",
-                      "displayName": "Hannover - GA4",
-                      "parent": "accounts/175492763"
+                      "name": "properties/270511251",
+                      "propertyId": "270511251",
+                      "displayName": "Nanda Cora - Real",
+                      "parent": "accounts/195680050"
                     }
                   ],
                   "nextPageToken": ""
@@ -144,7 +144,7 @@
               "schema": { "$ref": "#/components/schemas/Ga4ReportRequest" },
               "example": {
                 "dimensions": [ { "name": "date" } ],
-                "metrics": [ { "name": "sessions" } ],
+                "metrics": [ { "name": "sessions" }, { "name": "totalUsers" } ],
                 "dateRanges": [ { "startDate": "2025-01-01", "endDate": "2025-01-07" } ],
                 "limit": 100
               }
@@ -169,6 +169,225 @@
           },
           "400": { "description": "Requisição inválida para a API GA4" },
           "401": { "description": "Autenticação inválida ou ausente" }
+        }
+      }
+    }
+    ,
+    "/ga4/properties/{propertyId}/runPivotReport": {
+      "post": {
+        "operationId": "runGa4PivotReport",
+        "summary": "Executa relatório GA4 com pivôs",
+        "security": [ { "internalToken": [] } ],
+        "parameters": [
+          {
+            "name": "propertyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "ID da propriedade (com ou sem prefixo properties/)."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Ga4PivotReportRequest" },
+              "example": {
+                "dimensions": [ { "name": "date" } ],
+                "metrics": [ { "name": "sessions" } ],
+                "pivots": [
+                  {
+                    "fieldNames": [ "date" ],
+                    "limit": 10,
+                    "orderBys": [ { "dimension": { "dimensionName": "date" }, "desc": true } ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Ga4GenericResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ga4/properties/{propertyId}/batchRunReports": {
+      "post": {
+        "operationId": "batchRunGa4Reports",
+        "summary": "Executa múltiplos relatórios GA4 em lote",
+        "security": [ { "internalToken": [] } ],
+        "parameters": [
+          {
+            "name": "propertyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "ID da propriedade (com ou sem prefixo properties/)."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Ga4BatchRunReportsRequest" },
+              "example": {
+                "requests": [
+                  {
+                    "dimensions": [ { "name": "date" } ],
+                    "metrics": [ { "name": "sessions" } ],
+                    "dateRanges": [ { "startDate": "2025-10-01", "endDate": "2025-10-07" } ]
+                  },
+                  {
+                    "dimensions": [ { "name": "city" } ],
+                    "metrics": [ { "name": "totalUsers" } ],
+                    "limit": 5
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Ga4GenericResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ga4/properties/{propertyId}/batchRunPivotReports": {
+      "post": {
+        "operationId": "batchRunGa4PivotReports",
+        "summary": "Executa múltiplos relatórios GA4 com pivôs em lote",
+        "security": [ { "internalToken": [] } ],
+        "parameters": [
+          {
+            "name": "propertyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "ID da propriedade (com ou sem prefixo properties/)."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Ga4BatchRunPivotReportsRequest" },
+              "example": {
+                "requests": [
+                  {
+                    "dimensions": [ { "name": "date" } ],
+                    "metrics": [ { "name": "sessions" } ],
+                    "pivots": [
+                      {
+                        "fieldNames": [ "date" ],
+                        "limit": 7
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Ga4GenericResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ga4/properties/{propertyId}/runRealtimeReport": {
+      "post": {
+        "operationId": "runGa4RealtimeReport",
+        "summary": "Executa relatório em tempo real",
+        "security": [ { "internalToken": [] } ],
+        "parameters": [
+          {
+            "name": "propertyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "ID da propriedade (com ou sem prefixo properties/)."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Ga4RealtimeReportRequest" },
+              "example": {
+                "dimensions": [ { "name": "unifiedScreenName" } ],
+                "metrics": [ { "name": "screenPageViews" } ],
+                "limit": 10
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Ga4GenericResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ga4/properties/{propertyId}/checkCompatibility": {
+      "post": {
+        "operationId": "checkGa4Compatibility",
+        "summary": "Verifica compatibilidade de dimensões/métricas",
+        "security": [ { "internalToken": [] } ],
+        "parameters": [
+          {
+            "name": "propertyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "ID da propriedade (com ou sem prefixo properties/)."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Ga4CompatibilityRequest" },
+              "example": {
+                "dimensions": [ { "name": "date" } ],
+                "metrics": [ { "name": "sessions" }, { "name": "totalUsers" } ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Ga4GenericResponse" }
+              }
+            }
+          }
         }
       }
     }
@@ -235,6 +454,67 @@
           "limit": { "type": "integer" }
         },
         "required": [ "metrics", "dateRanges" ],
+        "additionalProperties": true
+      },
+      "Ga4PivotReportRequest": {
+        "type": "object",
+        "properties": {
+          "dimensions": { "type": "array", "items": { "type": "object" } },
+          "metrics": { "type": "array", "items": { "type": "object" } },
+          "pivots": { "type": "array", "items": { "type": "object" } },
+          "dateRanges": { "type": "array", "items": { "type": "object" } }
+        },
+        "additionalProperties": true
+      },
+      "Ga4BatchRunReportsRequest": {
+        "type": "object",
+        "properties": {
+          "requests": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Ga4ReportRequest" }
+          }
+        },
+        "required": [ "requests" ],
+        "additionalProperties": false
+      },
+      "Ga4BatchRunPivotReportsRequest": {
+        "type": "object",
+        "properties": {
+          "requests": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Ga4PivotReportRequest" }
+          }
+        },
+        "required": [ "requests" ],
+        "additionalProperties": false
+      },
+      "Ga4RealtimeReportRequest": {
+        "type": "object",
+        "properties": {
+          "dimensions": { "type": "array", "items": { "type": "object" } },
+          "metrics": { "type": "array", "items": { "type": "object" } },
+          "limit": { "type": "integer" },
+          "dimensionFilter": { "type": "object" },
+          "metricFilter": { "type": "object" }
+        },
+        "additionalProperties": true
+      },
+      "Ga4CompatibilityRequest": {
+        "type": "object",
+        "properties": {
+          "dimensions": { "type": "array", "items": { "type": "object" } },
+          "metrics": { "type": "array", "items": { "type": "object" } },
+          "dimensionFilter": { "type": "object" },
+          "metricFilter": { "type": "object" }
+        },
+        "additionalProperties": true
+      },
+      "Ga4GenericResponse": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" },
+          "data": { "type": "object" }
+        },
         "additionalProperties": true
       }
     }

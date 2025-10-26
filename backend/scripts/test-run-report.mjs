@@ -2,9 +2,9 @@ import { runGa4Report } from '../src/services/ga4AnalyticsService.js';
 
 async function main() {
   try {
-    const result = await runGa4Report('properties/398907411', {
+    const result = await runGa4Report('properties/270511251', {
       dimensions: [{ name: 'date' }],
-      metrics: [{ name: 'sessions' }],
+      metrics: [{ name: 'sessions' }, { name: 'totalUsers' }],
       dateRanges: [{ startDate: '2025-10-01', endDate: '2025-10-24' }],
       limit: 10
     });
